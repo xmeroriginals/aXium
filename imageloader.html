@@ -50,6 +50,7 @@
         const messageElement = document.getElementById('message');
 
         if (imageDataURI) {
+            // Resmi yükle
             const img = new Image();
             img.src = imageDataURI;
             img.onload = function() {
