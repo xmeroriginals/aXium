@@ -1,72 +1,88 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Display</title>
+    <title>DataURI Viewer</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background: #000;
-            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
             font-family: Arial, sans-serif;
             text-align: center;
-            transition: background 0.5s;
         }
 
-        .image-container {
+        .container {
             position: relative;
+            max-width: 80%;
+            max-height: 80%;
         }
 
         img {
-            border: 7px solid white;
             max-width: 100%;
-            max-height: 80vh;
+            max-height: 100%;
+            border: 7px solid white;
+            background-size: cover;
+            background-position: center;
         }
 
-        .message {
+        .fallback {
             font-size: 24px;
             font-weight: bold;
-        }
-
-        .gradient-bg {
-            background: linear-gradient(45deg, #ff7e5f, #feb47b);
         }
     </style>
 </head>
 <body>
-    <div id="content" class="image-container">
-        <p id="message" class="message">No Image</p>
+    <div class="container" id="imageContainer">
+        <div class="fallback" id="fallbackMessage">No Image</div>
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const dataUri = urlParams.get('datauri');
+        function setBackgroundGradient(image) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
 
-        const messageElement = document.getElementById('message');
-        const contentElement = document.getElementById('content');
+            canvas.width = 10;
+            canvas.height = 10;
+
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            const pixelData = context.getImageData(0, 0, canvas.width, canvas.height).data;
+
+            const colors = [];
+            for (let i = 0; i < pixelData.length; i += 4) {
+                const r = pixelData[i];
+                const g = pixelData[i + 1];
+                const b = pixelData[i + 2];
+                colors.push(`rgb(${r},${g},${b})`);
+            }
+
+            const gradientColors = colors.slice(0, 3).join(", ");
+            document.body.style.background = `linear-gradient(${gradientColors})`;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const dataUri = params.get('datauri');
 
         if (dataUri) {
             const img = new Image();
+            const container = document.getElementById('imageContainer');
+            const fallback = document.getElementById('fallbackMessage');
+
             img.src = dataUri;
-
-            img.onload = function() {
-                messageElement.style.display = 'none';
-                contentElement.style.background = 'none';
-                contentElement.appendChild(img);
-                contentElement.style.background = 'linear-gradient(45deg, #ff7e5f, #feb47b)';
+            img.onload = () => {
+                fallback.style.display = 'none';
+                container.appendChild(img);
+                setBackgroundGradient(img);
             };
 
-            img.onerror = function() {
-                messageElement.textContent = 'Image Could Not Be Loaded';
+            img.onerror = () => {
+                fallback.textContent = 'Image Could Not Be Loaded';
             };
-        } else {
-            messageElement.textContent = 'No Image';
-            contentElement.classList.add('gradient-bg');
         }
     </script>
 </body>
