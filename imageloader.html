@@ -3,86 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DataURI Viewer</title>
+    <title>Image Loader</title>
     <style>
         body {
             margin: 0;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
             background-color: black;
             color: white;
             font-family: Arial, sans-serif;
-            text-align: center;
-        }
-
-        .container {
-            position: relative;
-            max-width: 80%;
-            max-height: 80%;
         }
 
         img {
-            max-width: 100%;
-            max-height: 100%;
+            max-width: 80%;
+            max-height: 80%;
             border: 7px solid white;
-            background-size: cover;
-            background-position: center;
         }
 
-        .fallback {
+        .error {
             font-size: 24px;
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="imageContainer">
-        <div class="fallback" id="fallbackMessage">No Image</div>
+    <div id="content">
+        <div class="error" id="errorMessage">No Image</div>
     </div>
 
     <script>
-        function setBackgroundGradient(image) {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-
-            canvas.width = 10;
-            canvas.height = 10;
-
-            context.drawImage(image, 0, 0, canvas.width, canvas.height);
-            const pixelData = context.getImageData(0, 0, canvas.width, canvas.height).data;
-
-            const colors = [];
-            for (let i = 0; i < pixelData.length; i += 4) {
-                const r = pixelData[i];
-                const g = pixelData[i + 1];
-                const b = pixelData[i + 2];
-                colors.push(`rgb(${r},${g},${b})`);
-            }
-
-            const gradientColors = colors.slice(0, 3).join(", ");
-            document.body.style.background = `linear-gradient(${gradientColors})`;
-        }
-
         const params = new URLSearchParams(window.location.search);
-        const dataUri = params.get('datauri');
+        const base64Data = params.get("datauri");
 
-        if (dataUri) {
+        const contentDiv = document.getElementById("content");
+        const errorMessage = document.getElementById("errorMessage");
+
+        if (base64Data) {
+            const completeDataUri = `data:image/${base64Data}`;
+
             const img = new Image();
-            const container = document.getElementById('imageContainer');
-            const fallback = document.getElementById('fallbackMessage');
+            img.src = completeDataUri;
 
-            img.src = dataUri;
             img.onload = () => {
-                fallback.style.display = 'none';
-                container.appendChild(img);
-                setBackgroundGradient(img);
+                errorMessage.style.display = "none";
+                contentDiv.appendChild(img);
             };
 
             img.onerror = () => {
-                fallback.textContent = 'Image Could Not Be Loaded';
+                errorMessage.textContent = "Image Could Not Be Loaded";
             };
+        } else {
+            errorMessage.textContent = "No Image";
         }
     </script>
 </body>
