@@ -50,20 +50,25 @@
         const messageElement = document.getElementById('message');
 
         if (imageDataURI) {
-            // Resmi yükle
-            const img = new Image();
-            img.src = imageDataURI;
-            img.onload = function() {
-                imageElement.src = imageDataURI;
-                imageElement.style.display = 'block';
-                messageElement.textContent = '';
-                createGradientFromImage(imageDataURI);
-            };
-            img.onerror = function() {
-                messageElement.textContent = 'Image Could Not Be Loaded';
+            if (imageDataURI.startsWith('data:image')) {
+                const img = new Image();
+                img.src = imageDataURI;
+                img.onload = function() {
+                    imageElement.src = imageDataURI;
+                    imageElement.style.display = 'block';
+                    messageElement.textContent = '';
+                    createGradientFromImage(imageDataURI);
+                };
+                img.onerror = function() {
+                    messageElement.textContent = 'Image Could Not Be Loaded';
+                    messageElement.style.color = 'white';
+                    document.body.style.backgroundColor = 'black';
+                };
+            } else {
+                messageElement.textContent = 'Invalid Image Data URI';
                 messageElement.style.color = 'white';
                 document.body.style.backgroundColor = 'black';
-            };
+            }
         } else {
             messageElement.textContent = 'No Image';
             messageElement.style.color = 'white';
