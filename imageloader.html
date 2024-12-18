@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Loader</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        img {
+            border: 7px solid;
+            max-width: 100%;
+            max-height: 80vh;
+        }
+        .message {
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img id="image" src="" alt="Image" style="display:none;">
+        <div id="message" class="message">Loading...</div>
+    </div>
+
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const imageDataURI = getQueryParam('image');
+        const imageElement = document.getElementById('image');
+        const messageElement = document.getElementById('message');
+
+        if (imageDataURI) {
+            const img = new Image();
+            img.src = imageDataURI;
+            img.onload = function() {
+                imageElement.src = imageDataURI;
+                imageElement.style.display = 'block';
+                messageElement.textContent = '';
+                createGradientFromImage(imageDataURI);
+            };
+            img.onerror = function() {
+                messageElement.textContent = 'Image Could Not Be Loaded';
+                messageElement.style.color = 'white';
+                document.body.style.backgroundColor = 'black';
+            };
+        } else {
+            messageElement.textContent = 'No Image';
+            messageElement.style.color = 'white';
+            document.body.style.backgroundColor = 'black';
+        }
+
+        function createGradientFromImage(imageSrc) {
+            const img = new Image();
+            img.src = imageSrc;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                let r = 0, g = 0, b = 0;
+
+                for (let i = 0; i < pixelData.length; i += 4) {
+                    r += pixelData[i];
+                    g += pixelData[i + 1];
+                    b += pixelData[i + 2];
+                }
+
+                r = Math.floor(r / (pixelData.length / 4));
+                g = Math.floor(g / (pixelData.length / 4));
+                b = Math.floor(b / (pixelData.length / 4));
+
+                const gradient = `linear-gradient(to right, rgb(${r}, ${g}, ${b}), rgb(0, 0, 0))`;
+                document.body.style.background = gradient;
+            };
+        }
+    </script>
+</body>
+</html>
