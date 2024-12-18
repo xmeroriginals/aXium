@@ -3,51 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Loader</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: black;
-            color: white;
-        }
-        img {
-            max-width: 90%;
-            max-height: 90%;
-            border: 2px solid white;
-        }
-        .error {
-            font-size: 1.5em;
-            font-family: Arial, sans-serif;
-        }
-    </style>
+    <title>Data URI to Image</title>
 </head>
 <body>
-    <div id="container">
-        <div id="error" class="error">No image data found.</div>
-    </div>
+    <div id="image-container"></div>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const base64Data = params.get('datauri');
+        const dataUri = params.get('datauri');
 
-        const container = document.getElementById('container');
-        const error = document.getElementById('error');
-
-        if (base64Data) {
+        if (dataUri) {
             const img = new Image();
-            img.src = `data:image/png;base64,${base64Data}`;
-            img.onload = () => {
-                error.style.display = 'none';
-                container.appendChild(img);
-            };
-            img.onerror = () => {
-                error.textContent = 'Error loading the image.';
-            };
+            img.src = dataUri;
+
+            document.getElementById('image-container').appendChild(img);
         } else {
-            error.textContent = 'No image data provided.';
+            document.body.innerHTML = '<p>No data URI provided in the query parameters.</p>';
         }
     </script>
 </body>
