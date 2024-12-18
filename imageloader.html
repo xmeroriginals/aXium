@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Loader</title>
+    <title>Image Display</title>
     <style>
         body {
             display: flex;
@@ -12,94 +12,61 @@
             height: 100vh;
             margin: 0;
             background: #000;
-            color: white;
+            color: #fff;
             font-family: Arial, sans-serif;
             text-align: center;
+            transition: background 0.5s;
         }
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+
+        .image-container {
+            position: relative;
         }
+
         img {
-            border: 7px solid;
+            border: 7px solid white;
             max-width: 100%;
             max-height: 80vh;
         }
+
         .message {
-            font-size: 20px;
-            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <img id="image" src="" alt="Image" style="display:none;">
-        <div id="message" class="message">Loading...</div>
+    <div id="content" class="image-container">
+        <p id="message" class="message">No Image</p>
     </div>
 
     <script>
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataUri = urlParams.get('datauri');
 
-        const imageDataURI = getQueryParam('image');
-        const imageElement = document.getElementById('image');
         const messageElement = document.getElementById('message');
+        const contentElement = document.getElementById('content');
 
-        if (imageDataURI) {
-            if (imageDataURI.startsWith('data:image')) {
-                const img = new Image();
-                img.src = imageDataURI;
-                img.onload = function() {
-                    imageElement.src = imageDataURI;
-                    imageElement.style.display = 'block';
-                    messageElement.textContent = '';
-                    createGradientFromImage(imageDataURI);
-                };
-                img.onerror = function() {
-                    messageElement.textContent = 'Image Could Not Be Loaded';
-                    messageElement.style.color = 'white';
-                    document.body.style.backgroundColor = 'black';
-                };
-            } else {
-                messageElement.textContent = 'Invalid Image Data URI';
-                messageElement.style.color = 'white';
-                document.body.style.backgroundColor = 'black';
-            }
+        if (dataUri) {
+            const img = new Image();
+            img.src = dataUri;
+
+            img.onload = function() {
+                messageElement.style.display = 'none';
+                contentElement.style.background = 'none';
+                contentElement.appendChild(img);
+                contentElement.style.background = 'linear-gradient(45deg, #ff7e5f, #feb47b)';
+            };
+
+            img.onerror = function() {
+                messageElement.textContent = 'Image Could Not Be Loaded';
+            };
         } else {
             messageElement.textContent = 'No Image';
-            messageElement.style.color = 'white';
-            document.body.style.backgroundColor = 'black';
-        }
-
-        function createGradientFromImage(imageSrc) {
-            const img = new Image();
-            img.src = imageSrc;
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                let r = 0, g = 0, b = 0;
-
-                for (let i = 0; i < pixelData.length; i += 4) {
-                    r += pixelData[i];
-                    g += pixelData[i + 1];
-                    b += pixelData[i + 2];
-                }
-
-                r = Math.floor(r / (pixelData.length / 4));
-                g = Math.floor(g / (pixelData.length / 4));
-                b = Math.floor(b / (pixelData.length / 4));
-
-                const gradient = `linear-gradient(to right, rgb(${r}, ${g}, ${b}), rgb(0, 0, 0))`;
-                document.body.style.background = gradient;
-            };
+            contentElement.classList.add('gradient-bg');
         }
     </script>
 </body>
