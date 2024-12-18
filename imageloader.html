@@ -6,56 +6,48 @@
     <title>Image Loader</title>
     <style>
         body {
-            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
             background-color: black;
             color: white;
-            font-family: Arial, sans-serif;
         }
-
         img {
-            max-width: 80%;
-            max-height: 80%;
-            border: 7px solid white;
+            max-width: 90%;
+            max-height: 90%;
+            border: 2px solid white;
         }
-
         .error {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 1.5em;
+            font-family: Arial, sans-serif;
         }
     </style>
 </head>
 <body>
-    <div id="content">
-        <div class="error" id="errorMessage">No Image</div>
+    <div id="container">
+        <div id="error" class="error">No image data found.</div>
     </div>
-
     <script>
         const params = new URLSearchParams(window.location.search);
-        const base64Data = params.get("datauri");
+        const base64Data = params.get('datauri');
 
-        const contentDiv = document.getElementById("content");
-        const errorMessage = document.getElementById("errorMessage");
+        const container = document.getElementById('container');
+        const error = document.getElementById('error');
 
         if (base64Data) {
-            const completeDataUri = `data:image/${base64Data}`;
-
             const img = new Image();
-            img.src = completeDataUri;
-
+            img.src = `data:image/png;base64,${base64Data}`;
             img.onload = () => {
-                errorMessage.style.display = "none";
-                contentDiv.appendChild(img);
+                error.style.display = 'none';
+                container.appendChild(img);
             };
-
             img.onerror = () => {
-                errorMessage.textContent = "Image Could Not Be Loaded";
+                error.textContent = 'Error loading the image.';
             };
         } else {
-            errorMessage.textContent = "No Image";
+            error.textContent = 'No image data provided.';
         }
     </script>
 </body>
